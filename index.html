@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <title>TAB</title>
+        <style>
+            .triad_options
+            {
+                background-color: #EEFFFF;
+                color: #888888;
+                visibility: hidden;
+                
+            }
+            .option_divider
+            {
+                color: #000000;
+            }
+        </style>
+        <script src="tab_script.js"></script>
+    </head>
+<body>
+    <form id="note_selector" name="note_selector" method="get">
+        <table>
+            <tr><th>Root</th><td></td><th>Root</th><td></td><th>Root</th><td></td>
+            <script>
+                draw_note_form();
+            </script>
+        </table>
+    </form>
+    <hr />
+	<table id="music_notes_table" name="music_notes_table" cellpadding="15px;">
+        <tr id="real_notes_row" name="real_notes_row"></tr>
+	</table>
+</body>
+</html>
