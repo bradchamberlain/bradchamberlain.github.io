@@ -1,33 +1,74 @@
 <html>
     <head>
-        <title>TAB</title>
+        <title>My Music</title>
         <style>
-            .triad_options
+            body
             {
-                background-color: #EEFFFF;
-                color: #888888;
-                visibility: hidden;
-                
+                 background-color: black;
+                 color: white;
             }
-            .option_divider
+        
+            .music_link
             {
-                color: #000000;
+                display: block;
+            }
+            .music_link a
+            {
+                color: lightblue;
             }
         </style>
-        <script src="tab_script.js"></script>
+        <script>
+            var pages = [
+                ["2steps.html","2 Steps Behind"],
+                ["Amber.html","Amber"],
+                ["Highwayman.html",""],
+                ["MamasDontLetYourBabiesGrowUp.html","Mamas Don't Let Your Babies Grow Up To Be Cowboys"],
+                ["OnTheRoadAgain.html","On The Road Again"],
+                ["absolutlyStill.html","Absolutly Still"],
+                ["africa.html","Africa"],
+                ["blame.html","Blame"],
+                ["blondie_tide_is_high.html","The Tide Is High"],
+                ["catscratchfever.html","Cat Scratch Fever"],
+                ["crash_into_me.html","Crash Into Me"],
+                ["delilah.html","Hey There Delilah"],
+                ["fastcar.html","Fast Car"],
+                ["good.html","Good"],
+                ["hey_soul_sister_crd.htm","Soul Sister"],
+                ["iris.html","Iris"],
+                ["jumpup.html","Jump Up"],
+                ["kissthegirl.html","Kiss The Girl"],
+                ["listen.html","Listen"],
+                ["man_in_the_box.html","Man In The Box"],
+                ["naked.html","Naked"],
+                ["neededsomeonesobad.html","Have You Ever Needed Someone So Bad"],
+                ["nowandforever.html","Now And Forever"],
+                ["rainbowconnection.html","Rainbow Connection"],
+                ["savetonight.html","Save Tonight"],
+                ["sheryl_crow_first_cut.html","First Cut"],
+                ["shesaid.html","She Said"],
+                ["smallworld.html","It's A Small World"],
+                ["speed_practice.html","SpeedPractice"],
+                ["story_book.html","Story Book Love"],
+                ["surrender.html","Surrender"],
+                ["whenyoudream.html","When You Dream"],
+                ["whereEverybodyKnowsYourName.html","Where Everybody Knows Your Name"]
+            ];
+        </script>
     </head>
 <body>
-    <form id="note_selector" name="note_selector" method="get">
-        <table>
-            <tr><th>Root</th><td></td><th>Root</th><td></td><th>Root</th><td></td>
-            <script>
-                draw_note_form();
-            </script>
-        </table>
-    </form>
-    <hr />
-	<table id="music_notes_table" name="music_notes_table" cellpadding="15px;">
-        <tr id="real_notes_row" name="real_notes_row"></tr>
-	</table>
+    <div class="tab_links">
+    <span class="music_link"><a href="triad_finder.html">Note Selector</a></span>
+    <script>
+        for(i=0;i<pages.length;i++)
+        {
+            document.write("<span class='music_link'><a href=\"tabs/" + pages[i][0] + "\">" + pages[i][1] + "</a></span>");
+        }
+    </script>
+    </div>
+    <div class="circle_fifths">
+        <a href="circle_of_fifths.jpg">
+        <img width="400px" src="circle_of_fifths.jpg" />
+        </a>
+    </div>
 </body>
 </html>
