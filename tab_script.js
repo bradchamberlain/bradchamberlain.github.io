@@ -6,6 +6,7 @@ var major_fifths = [];
 minor_fifths = [];
 var root_notes = [];
 var frets = [];
+var checkboxes = ["_major_triads","_minor_triads","_minor_pentatonic", "_major_pentatonic"];
 
 major_fifths["F"] = [["AB","C"],["G","D","A"]];
 major_fifths["C"] = [["F","G"], ["D","A","E"]];
@@ -81,44 +82,17 @@ function get_color()
     return c;
 }
 
-function major_triads(note, color){
+function add_notes(note, color, offsets){
     var tri_string = "";
     for(i = 0 ; i < root_notes[note].length; i++ ){
         current_root = root_notes[note][i];
         current_fret = frets.indexOf(current_root[1]);
-        if(current_fret - 5 > -1){
-            tri_string += '<circle cx="' + current_root[0] + '" cy="' + frets[current_fret - 5] + '" r="8" stroke="' + color + '" stroke-width="4" fill="transparent" />';
-        }
-        if(current_fret - 8 > -1){
-            tri_string += '<circle cx="' + current_root[0] + '" cy="' + frets[current_fret - 8] + '" r="8" stroke="' + color + '" stroke-width="4" fill="transparent" />';
-        }
-        if(current_fret + 4 < frets.length)
+        for(j = 0 ; j < offsets.length; j++)
         {
-            tri_string += '<circle cx="' + current_root[0] + '" cy="' + frets[current_fret + 4] + '" r="8" stroke="' + color + '" stroke-width="4" fill="transparent" />';
-        }
-        
-    }
-    return tri_string;
-}
-
-function minor_triads(note, color){
-    var tri_string = "";
-    for(i = 0 ; i < root_notes[note].length; i++ ){
-        var current_root = root_notes[note][i];
-        current_fret = frets.indexOf(current_root[1]);
-        if(current_fret + 3 < frets.length){
-            tri_string += '<circle cx="' + current_root[0] + '" cy="' + frets[current_fret + 3] + '" r="8" stroke="' + color + '" stroke-width="4" fill="transparent" />';
-        }
-        if(current_fret + 7 < frets.length){
-            tri_string += '<circle cx="' + current_root[0] + '" cy="' + frets[current_fret + 7] + '" r="8" stroke="' + color + '" stroke-width="4" fill="transparent" />';
-        }
-        if(current_fret - 5 > -1)
-        {
-            tri_string += '<circle cx="' + current_root[0] + '" cy="' + frets[current_fret - 5] + '" r="8" stroke="' + color + '" stroke-width="4" fill="transparent" />';
-        }
-        if(current_fret - 9 > -1)
-        {
-            tri_string += '<circle cx="' + current_root[0] + '" cy="' + frets[current_fret - 9] + '" r="8" stroke="' + color + '" stroke-width="4" fill="transparent" />';
+            if((offsets[j] < 0 && current_fret + offsets[j] > -1) || (offsets[j] > 0 && current_fret + offsets[j] < frets.length))
+            {
+                tri_string += '<circle cx="' + current_root[0] + '" cy="' + frets[current_fret + offsets[j]] + '" r="8" stroke="' + color + '" stroke-width="4" fill="transparent" />';
+            }
         }
     }
     return tri_string;
@@ -134,6 +108,16 @@ function is_minor(note)
     return document.getElementById("chk_" + note + "_minor_triads").checked
 }
 
+function is_major_pent(note)
+{
+    return document.getElementById("chk_" + note + "_major_pentatonic").checked
+}
+
+function is_minor_pent(note)
+{
+    return document.getElementById("chk_" + note + "_minor_pentatonic").checked
+}
+
 function draw_notes(note, in_color = null, note_title = null) {
     
     var row = document.getElementById("real_notes_row");
@@ -145,7 +129,7 @@ function draw_notes(note, in_color = null, note_title = null) {
         x.id = "td_" + note;
     }
     
-    var val = "<p align='center'>" + note_title + (is_major(note) ? " Major " : is_minor(note) ? " Minor" : "") + "</p>";
+    var val = "<p align='center'>" + note_title + (is_major(note) ? " M. Triads" : is_minor(note) ? " m. Triads" : is_major_pent(note) ? " M. Pentatonic" : is_minor_pent(note) ? " m. Pentatonic" : "") + "</p>";
     var color = in_color;
     if(color === null)
     {
@@ -157,16 +141,19 @@ function draw_notes(note, in_color = null, note_title = null) {
     {
         val += '<circle cx="' + root_notes[note][i][0] + '" cy="' + root_notes[note][i][1] + '" r="10" stroke="' + color + '" stroke-width="1" fill="' + color + '" />';
     }
-    if(document.getElementById("chk_" + note + "_major_triads").checked)
+    for(cb=0;cb<checkboxes.length;cb++)
     {
-        val += major_triads(note, color);
-        color_major_fifths(note);
+        var cb_box = document.getElementById("chk_" + note + checkboxes[cb]);
+        if(cb_box.checked)
+        {
+            var o = cb_box.value.split(",").map(Number);
+            val += add_notes(note, color, o);
+            var note_type = cb_box.getAttribute("note_type");
+            color_fifths(note, cb_box.id.indexOf("major") > 0 ? "major" : "minor", note_type);
+            break;
+        }
     }
-    else if(document.getElementById("chk_" + note + "_minor_triads").checked)
-    {
-        val += minor_triads(note, color);
-        color_minor_fifths(note);
-    }
+    
     val += '</svg>';
     x.innerHTML = val;
 }
@@ -197,46 +184,30 @@ function reset_colors()
 var major_color = "#FF6600";
 var minor_color = "#0000CC";
 
-function color_major_fifths(note)
+function color_fifths(note,relative_type, triad_type)
 {
     if(checked_notes() == 1)
     {
         reset_colors();
-        if(major_fifths[note] != null)
-        {
-            document.getElementById("td_notes_" + major_fifths[note][0][0]).style.color = major_color;
-            document.getElementById("chk_" + major_fifths[note][0][0] + "_major_triads").checked = true;
-            document.getElementById("td_notes_" + major_fifths[note][0][1]).style.color = major_color;
-            document.getElementById("chk_" + major_fifths[note][0][1] + "_major_triads").checked = true;
-            
-            document.getElementById("td_notes_" + major_fifths[note][1][0]).style.color = minor_color;
-            document.getElementById("chk_" + major_fifths[note][1][0] + "_minor_triads").checked = true;
-            document.getElementById("td_notes_" + major_fifths[note][1][1]).style.color = minor_color;
-            document.getElementById("chk_" + major_fifths[note][1][1] + "_minor_triads").checked = true;
-            document.getElementById("td_notes_" + major_fifths[note][1][2]).style.color = minor_color;
-            document.getElementById("chk_" + major_fifths[note][1][2] + "_minor_triads").checked = true;
-        }
-    }
-}
 
-function color_minor_fifths(note)
-{
-    if(checked_notes() == 1)
-    {
-        reset_colors();
-        if(minor_fifths[note] != null)
+        document.getElementById("td_notes_" + major_fifths[note][0][0]).style.color = major_color;
+        document.getElementById("chk_" +      major_fifths[note][0][0] + "_major_" + triad_type).checked = true;
+        document.getElementById("td_notes_" + major_fifths[note][0][1]).style.color = major_color;
+        document.getElementById("chk_" +      major_fifths[note][0][1] + "_major_" + triad_type).checked = true;
+        document.getElementById("td_notes_" + major_fifths[note][1][0]).style.color = minor_color;
+        document.getElementById("chk_" +      major_fifths[note][1][0] + "_minor_" + triad_type).checked = true;
+        document.getElementById("td_notes_" + major_fifths[note][1][1]).style.color = minor_color;
+        document.getElementById("chk_" +      major_fifths[note][1][1] + "_minor_" + triad_type).checked = true;
+
+        if(relative_type === 'major')
         {
-            document.getElementById("td_notes_" + minor_fifths[note][0][0]).style.color = major_color;
-            document.getElementById("chk_" + minor_fifths[note][0][0] + "_major_triads").checked = true;
-            document.getElementById("td_notes_" + minor_fifths[note][0][1]).style.color = major_color;
-            document.getElementById("chk_" + minor_fifths[note][0][1] + "_major_triads").checked = true;
+            document.getElementById("td_notes_" + major_fifths[note][1][2]).style.color = minor_color;
+            document.getElementById("chk_" +      major_fifths[note][1][2] + "_minor_" + triad_type).checked = true;
+        }
+        else if(relative_type === 'minor')
+        {
             document.getElementById("td_notes_" + minor_fifths[note][0][2]).style.color = major_color;
-            document.getElementById("chk_" + minor_fifths[note][0][2] + "_major_triads").checked = true;
-            
-            document.getElementById("td_notes_" + minor_fifths[note][1][0]).style.color = minor_color;
-            document.getElementById("chk_" + minor_fifths[note][1][0] + "_minor_triads").checked = true;
-            document.getElementById("td_notes_" + minor_fifths[note][1][1]).style.color = minor_color;
-            document.getElementById("chk_" + minor_fifths[note][1][1] + "_minor_triads").checked = true;
+            document.getElementById("chk_" +      minor_fifths[note][0][2] + "_major_" + triad_type).checked = true;
         }
     }
 }
@@ -292,11 +263,19 @@ function draw_note_form()
         document.write("<label for=\"chk_" + note_name + "\">" + all_notes[i] + "</label>");
         document.write("<input type=\"checkbox\" id=\"chk_" + note_name + "\" name=\"chk_" + note_name + "\" value=\"" + note_name+ "\" onchange=\"do_draw('" + note_name + "','" + all_notes[i] + "');\" /></td><td>");
         document.write("<div id=\"div" + note_name + "\" class=\"triad_options\">");
-        document.write("<input type=\"radio\" name=\"chk_" + note_name + "_triads\" id=\"chk_" + note_name + "_major_triads\" value=\"major\" onchange=\"do_draw('" + note_name + "','" + all_notes[i] + "');\" />");
-        document.write(" <label for=\"chk_" + note_name + "_major_triads\">major</label>");
+        document.write("(<input type=\"radio\" note_type=\"triads\" name=\"chk_" + note_name + "_triads\" id=\"chk_" + note_name + "_major_triads\" value=\"-5,-8,4\" onchange=\"do_draw('" + note_name + "','" + all_notes[i] + "');\" />");
+        document.write(" <label for=\"chk_" + note_name + "_major_triads\" class=\"maj_min\">major</label>");
         document.write(" <span class=\"option_divider\">|</span> ");
-        document.write("<input type=\"radio\" name=\"chk_" + note_name + "_triads\" id=\"chk_" + note_name + "_minor_triads\" value=\"minor\" onchange=\"do_draw('" + note_name + "','" + all_notes[i] + "');\" />");
-        document.write("<label for=\"chk_" + note_name + "_minor_triads\">minor</label>");
+        document.write("<input type=\"radio\" note_type=\"triads\" name=\"chk_" + note_name + "_triads\" id=\"chk_" + note_name + "_minor_triads\" value=\"-5,-9,3,7\" onchange=\"do_draw('" + note_name + "','" + all_notes[i] + "');\" />");
+        document.write("<label for=\"chk_" + note_name + "_minor_triads\" class=\"maj_min\">minor</label>");
+        document.write(") Triads ");
+        document.write("(<input type=\"radio\" note_type=\"pentatonic\" name=\"chk_" + note_name + "_triads\" id=\"chk_" + note_name + "_major_pentatonic\" value=\"-3,-5,-8,-10,2,4,7,9\" onchange=\"do_draw('" + note_name + "','" + all_notes[i] + "');\" />");
+        document.write("<label for=\"chk_" + note_name + "_triads\" class=\"maj_min\">major</label>");
+        
+        document.write(" <span class=\"option_divider\">|</span> ");
+        document.write("<input type=\"radio\" note_type=\"pentatonic\" name=\"chk_" + note_name + "_triads\" id=\"chk_" + note_name + "_minor_pentatonic\" value=\"-2,-5,-7,-9,3,5,7,10\" onchange=\"do_draw('" + note_name + "','" + all_notes[i] + "');\" />");
+        document.write("<label for=\"chk_" + note_name + "_minor_pentatonic\" class=\"maj_min\">minor</label>) Pentatonic");
+        
         document.write("</div>");
         document.write("</td>");
         if(i%3>=2)
