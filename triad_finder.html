@@ -21,13 +21,12 @@
         </style>
         <script src="tab_script.js"></script>
     </head>
-<body>
+    <body onload="return draw_note_form();">
     <form id="note_selector" name="note_selector" method="get">
-        <table>
-            <tr><th>Root</th><td></td><th>Root</th><td></td><th>Root</th><td></td>
-            <script>
-                draw_note_form();
-            </script>
+        <table id="note_form_table">
+            <tr><th>Root</th><td></td><th>Root</th><td></td><th>Root</th><td></td></tr>
+            <tbody id="note_form_table_body">
+            </tbody>
         </table>
     </form>
     <hr />
